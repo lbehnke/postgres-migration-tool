@@ -1,0 +1,103 @@
+<!--
+  Copyright 2013 Lars behnke
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<migration>
+    <!-- 
+    	Set global options here. You may refer to these options like this: ${key}.
+    	Options can be used in all element and attribute values of the configuration file.
+    
+	<options>
+		<option key="jdbc.url">jdbc:postgresql://localhost:5432/project</option>
+		<option key="jdbc.driver">org.postgresql.Driver</option>
+		<option key="jdbc.user">project</option>
+		<option key="jdbc.password"></option>
+	</options>		
+	-->
+
+	<!-- 
+		Log output to particular file. All log entries are written to standard output if left empty. 
+	
+	<log-file>/home/lars/test.log</log-file> 
+	-->
+	
+	<jobs>
+         <!-- Prints a message and waits (optionally) until user confirmation -->
+         <message-job name="Info">
+           <text>
+             This is an example message that requires user confirmation.
+           </text>
+           <confirmation-required>true</confirmation-required>
+        </message-job>
+        
+		<!--
+			Performs a database dump and a subsequent restore.
+			pg_dump -U project -h localhost -f hint.dump -Ft -n public project2
+			pg_restore -U project -h localhost -d project -Ft -c hint.dump
+			
+			The parameters tools-dir, dump-file, keep-dump-file are optional.
+            If authentication fails, check http://www.postgresql.org/docs/current/interactive/libpq-pgpass.html
+			
+		<pg-migration-job name="project migration">
+			<tools-dir>/usr/bin</tools-dir>
+			<dump-file>/home/lars/test.dump</dump-file>
+			<keep-dump-file>false</keep-dump-file>
+			<dump>
+				<user>project</user>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<schema>public</schema>
+				<format>t</format>
+				<verbose>true</verbose>
+			</dump>
+			<restore>
+				<user>project</user>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<format>t</format>
+				<verbose>true</verbose>
+			</restore>
+		</pg-migration-job>
+		-->
+
+		<!-- 
+			Execute an SQL statement for each object that is returned by the object-selector. 
+			The object selector query must return a result set that consists of a single text column. 
+			An SQL statement may only contain a single selector placeholder. However, an unlimited
+			number of options are permitted. Note the different placeholder syntax: 
+				${...} for an option
+				%{...} for an selector containing multiple values.
+
+		<sql-template-job name="project schema change">
+			<jdbc-url>${jdbc.url}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			<object-selectors>
+				<object-selector key="table">select table_name from information_schema.tables where table_schema='public' and table_name like 'lp_%'</object-selector>
+				<object-selector key="sequence">select sequence_name from information_schema.sequences where sequence_schema='public' and sequence_name like 'hibernate_sequence'</object-selector>
+			</object-selectors>
+			<statements>
+				<sql>alter table %{table} set schema project</sql>
+				<sql>alter sequence %{sequence} set schema project</sql>
+			</statements>
+
+		</sql-template-job>
+		-->
+		
+	</jobs>
+
+</migration>

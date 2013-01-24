@@ -1,0 +1,3 @@
+pg-migration-job=com.apporiented.tools.pgmigration.jobs.PgMigrationJob
+sql-template-job=com.apporiented.tools.pgmigration.jobs.SqlTemplateJob
+message-job=com.apporiented.tools.pgmigration.jobs.MessageJob

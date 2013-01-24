@@ -1,0 +1,246 @@
+<!--
+  Copyright 2013 Lars behnke
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<migration>
+	<options>
+		<option key="jdbc.url.old">jdbc:postgresql://localhost:5432/project2</option>
+		<option key="jdbc.url">jdbc:postgresql://localhost:5432/project</option>
+		<option key="jdbc.driver">org.postgresql.Driver</option>
+		<option key="jdbc.user">postgres</option>
+		<option key="jdbc.password"></option>
+	</options>		
+
+
+	<!-- Optional parameter. All log entries are written to standard output if left empty. -->
+	<!-- <log-file>/home/lars/test.log</log-file> -->
+	
+	<jobs>
+	
+		<!-- 
+			Setup the new database.
+		-->
+		<sql-template-job name="database setup">
+			<jdbc-url>${jdbc.url.old}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			
+			<statements>
+				<sql>create database project with owner project encoding 'UTF-8'</sql>
+			</statements>
+		
+		</sql-template-job>
+
+		<!-- 
+			Setup the new schema.
+		-->
+		<sql-template-job name="schema setup">
+			<jdbc-url>${jdbc.url}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			
+			<statements>
+				<sql>create schema project authorization project</sql>
+				<sql>create schema project authorization project</sql>
+				<sql>create schema lcc authorization project</sql>
+				<sql>create schema gum authorization project</sql>
+				<sql>create schema spectrum authorization project</sql>
+				<sql>create schema jbossdb authorization project</sql>
+			</statements>
+		
+		</sql-template-job>
+		
+		<!-- PROJECT -->
+		<pg-migration-job name="project migration">
+			<tools-dir>/usr/bin</tools-dir>
+			<dump>
+				<user>${jdbc.user}</user>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<schema>public</schema>
+				<format>t</format>
+				<verbose>true</verbose>
+			</dump>
+			<restore>
+				<user>${jdbc.user}</user>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<format>t</format>
+				<verbose>true</verbose>
+			</restore>
+		</pg-migration-job>
+		
+		<sql-template-job name="project schema change">
+			<jdbc-url>${jdbc.url}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			<object-selectors>
+				<object-selector key="table">select table_name from information_schema.tables where table_schema='public' and table_name like 'lp_%'</object-selector>
+				<object-selector key="sequence">select sequence_name from information_schema.sequences where sequence_schema='public' and sequence_name like 'hibernate_sequence'</object-selector>
+			</object-selectors>
+			<statements>
+				<sql>alter table %{table} set schema project</sql>
+				<sql>alter sequence %{sequence} set schema project</sql>
+			</statements>
+		</sql-template-job>
+		
+		<!-- SPECTRUM_CACHE -->
+		<pg-migration-job name="spectrum cache migration">
+			<tools-dir>/usr/bin</tools-dir>
+			<dump>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>spectrum_cache</db>
+				<schema>public</schema>
+				<format>t</format>
+				<verbose>true</verbose>
+			</dump>
+			<restore>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<format>t</format>
+				<verbose>true</verbose>
+			</restore>
+		</pg-migration-job>
+		
+		<sql-template-job name="spectrum schema change">
+			<jdbc-url>${jdbc.url}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			<object-selectors>
+				<object-selector key="table">select table_name from information_schema.tables where table_schema='public' and table_name like 'sc_%'</object-selector>
+				<object-selector key="sequence">select sequence_name from information_schema.sequences where sequence_schema='public' and sequence_name like 'hibernate_sequence'</object-selector>
+			</object-selectors>
+			<statements>
+				<sql>alter table %{table} set schema spectrum</sql>
+				<sql>alter sequence %{sequence} set schema spectrum</sql>
+			</statements>
+		</sql-template-job>
+		
+		<!-- GUM -->
+		<pg-migration-job name="spectrum cache migration">
+			<tools-dir>/usr/bin</tools-dir>
+			<dump>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>gum</db>
+				<schema>public</schema>
+				<format>t</format>
+				<verbose>true</verbose>
+			</dump>
+			<restore>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<format>t</format>
+				<verbose>true</verbose>
+			</restore>
+		</pg-migration-job>
+		
+		<sql-template-job name="project schema change">
+			<jdbc-url>${jdbc.url}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			<object-selectors>
+				<object-selector key="table">select table_name from information_schema.tables where table_schema='public' and table_name like 'gum_%'</object-selector>
+				<object-selector key="sequence">select sequence_name from information_schema.sequences where sequence_schema='public' and sequence_name like 'hibernate_sequence'</object-selector>
+			</object-selectors>
+			<statements>
+				<sql>alter table %{table} set schema gum</sql>
+				<sql>alter sequence %{sequence} set schema gum</sql>
+			</statements>
+		</sql-template-job>
+		
+		<!-- LCC -->
+		<pg-migration-job name="LCC migration">
+			<tools-dir>/usr/bin</tools-dir>
+			<dump>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>lcc</db>
+				<schema>public</schema>
+				<format>t</format>
+				<verbose>true</verbose>
+			</dump>
+			<restore>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<format>t</format>
+				<verbose>true</verbose>
+			</restore>
+		</pg-migration-job>
+		
+		<sql-template-job name="LCC schema change">
+			<jdbc-url>${jdbc.url}</jdbc-url>
+			<jdbc-driver>${jdbc.driver}</jdbc-driver>
+			<jdbc-user>${jdbc.user}</jdbc-user>
+			<jdbc-password>${jdbc.password}</jdbc-password>
+			<object-selectors>
+				<object-selector key="table">select table_name from information_schema.tables where table_schema='public' and table_name like 'lm_%'</object-selector>
+				<object-selector key="sequence">select sequence_name from information_schema.sequences where sequence_schema='public' and sequence_name like 'hibernate_sequence'</object-selector>
+			</object-selectors>
+			<statements>
+				<sql>alter table %{table} set schema lcc</sql>
+				<sql>alter sequence %{sequence} set schema lcc</sql>
+			</statements>
+		</sql-template-job>
+		
+		<!-- JBOSS DB (stays in public schema) -->
+		<pg-migration-job name="LCC migration">
+			<tools-dir>/usr/bin</tools-dir>
+			<dump>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>jbossdb</db>
+				<schema>public</schema>
+				<format>t</format>
+				<verbose>true</verbose>
+			</dump>
+			<restore>
+				<user>${jdbc.user}</user>
+				<password></password>
+				<host>localhost</host>
+				<port>5432</port>
+				<db>project</db>
+				<format>t</format>
+				<verbose>true</verbose>
+			</restore>
+		</pg-migration-job>
+		
+	</jobs>
+
+</migration>
