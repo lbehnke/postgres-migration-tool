@@ -1,5 +1,5 @@
-Postgres Migration Tools
-------------------------
+Postgres Migration Tool
+-----------------------
 
 This tool was created to facilitate modification or migration tasks across multiple Postgres databases.
 See the attached example files to see how it works.
